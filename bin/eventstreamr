@@ -172,11 +172,12 @@ sub configure {
 
 # Signal Handler Subs
 sub self_update {
-  # TODO: Implement
+  $eventstreamr->update();
 }
 
 sub sig_exit {
   $eventstreamr->stop();
+  exit 0;
 }
 
 sub get_config {

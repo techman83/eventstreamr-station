@@ -142,7 +142,31 @@ method stop() {
     }
   }
   $self->info("Manager stopped: pid=$$, station_id=".$self->config->macaddress);
-  exit 0;
+}
+
+method update() {
+  use File::Slurp;
+  my $file = '/tmp/App-EventStreamr-0.2.tar.gz';
+  $self->info("Attempting self update");
+  
+  # yes yes, this is horrible. In the future we'll setup a local cpan mirror 
+  my $response = $self->config->http->get($self->config->controller."/eventstreamr/App-EventStreamr-0.2.tar.gz");
+  if (-e $file) {
+    unlink($file);
+  }
+
+  write_file( $file, {binmode => ':raw'}, $response->{content} );
+
+  if ($response->{status} == 200 && -e $file) {
+    $self->info("Archive downloaded");
+    system("cpanm -n $file");
+    my $options;
+    $options = "--debug" if $self->debug;
+    $self->stop;
+    exec("eventstreamr $options") or $self->error("Self exec failed $!");
+  } else {
+    $self->warn("Archive download failed");
+  }
 }
 
 with('App::EventStreamr::Roles::Logger');
