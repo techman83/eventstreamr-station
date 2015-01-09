@@ -41,6 +41,7 @@ or launch from the cli.
 use App::EventStreamr::Config;
 
 has 'debug' => ( is => 'ro', default => sub { 0 } );
+has 'daemon' => ( is => 'ro', default => sub { 1 } );
 has '_log_level' => ( is => 'ro', lazy => 1, builder => 1 );
 
 method _build__log_level() {
@@ -162,7 +163,9 @@ method update() {
     system("cpanm -n $file");
     my $options;
     $options = "--debug" if $self->debug;
+    $options .= " --nodaemon" if ! $self->daemon;
     $self->stop;
+    $self->info("Attempting to Exec self");
     exec("eventstreamr $options") or $self->error("Self exec failed $!");
   } else {
     $self->warn("Archive download failed");
