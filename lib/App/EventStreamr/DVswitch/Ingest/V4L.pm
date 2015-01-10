@@ -48,6 +48,6 @@ method _build_cmd_regex() {
   return qr:^[ffmpeg|avconv].+/dev/$self->{id}.*:;
 }
 
-with('App::EventStreamr::DVswitch::Roles::MixerWait');
+with('App::EventStreamr::DVswitch::Roles::AlsaWait');
 
 1;

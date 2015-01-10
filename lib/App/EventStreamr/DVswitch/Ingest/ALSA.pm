@@ -24,7 +24,7 @@ has 'cmd'         => ( is => 'ro', lazy => 1, builder => 1 );
 has 'id'          => ( is => 'ro', required => 1 );
 has 'device'      => ( is => 'rw', required => 1 );
 has 'card'        => ( is => 'rw', lazy => 1, builder => 1 );
-has 'type'        => ( is => 'ro', default => sub { 'ingest' } );
+has 'type'        => ( is => 'ro', default => sub { 'alsa' } );
 
 method _build_card() {
   $self->config->update_devices();

@@ -44,6 +44,6 @@ method _build_cmd_regex() {
   return qr:dvgrab.+$self->{id}.*:;
 }
 
-with('App::EventStreamr::DVswitch::Roles::MixerWait');
+with('App::EventStreamr::DVswitch::Roles::AlsaWait');
 
 1;
