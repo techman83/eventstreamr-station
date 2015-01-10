@@ -166,7 +166,7 @@ method update() {
     $options .= " --nodaemon" if ! $self->daemon;
     $self->stop;
     $self->info("Attempting to Exec self");
-    exec("eventstreamr $options") or $self->error("Self exec failed $!");
+    exec("/home/av/eventstreamr/start.sh") or $self->error("Self exec failed $!");
   } else {
     $self->warn("Archive download failed");
   }
