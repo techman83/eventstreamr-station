@@ -37,42 +37,49 @@ requires 'run_stop','status','config','id','type';
 
 method _alsa_started() {
   # THIS IS YUCKY! But the API needs improvement, so will look at that first.
+  if (! $self->config->alsa_running) {
+    $self->status->waiting($self->{id},$self->{type},"waiting_alsa") if ((time % 10) == 0 );
+    $self->debug("Checking for alsa process to have started");
+    my $status = $self->config->http->get("http://".$self->config->{mixer}{host}.":3000/status");
+    
+    my $content;
 
-  if ((defined $self->status->{$self->{id}}{running} && $self->status->{$self->{id}}{running} )
-      || (! $self->_run && ! $self->config->{run})) {
-    return 1;
-  }
+    eval {
+      $content = from_json($status->{content});
+    };
 
-  $self->status->waiting($self->{id},$self->{type},"waiting_alsa") if ((time % 10) == 0 );
-  $self->debug("Checking for alsa process to have started");
-  my $status = $self->config->http->get("http://".$self->config->{mixer}{host}.":3000/status");
-  my $content = from_json($status->{content});
-  
-  my @statuses; 
-  
-  # <Forgive me...>
-  foreach my $key (keys %{$content}) {
-    if (defined $content->{$key}{status}) {
-      foreach my $status (keys %{$content->{$key}{status}}) {
-        if (defined $content->{$key}{status}{$status}{type}) {
-          push(@statuses, $content->{$key}{status}{$status});
+    if ($content) { 
+      my @statuses; 
+      
+      # <Forgive me...>
+      foreach my $key (keys %{$content}) {
+        if (defined $content->{$key}{status}) {
+          foreach my $status (keys %{$content->{$key}{status}}) {
+            if (defined $content->{$key}{status}{$status}{type}) {
+              push(@statuses, $content->{$key}{status}{$status});
+            }
+          }
         }
       }
-    }
-  }
-  # </Forgive me...>
-  
-  
-  $self->debug({filter => \&Data::Dumper::Dumper,
-                value  => \@statuses}) if ($self->is_debug());
+      # </Forgive me...>
+      
+      
+      $self->debug({filter => \&Data::Dumper::Dumper,
+                    value  => \@statuses}) if ($self->is_debug());
 
-  my @alsa = grep { $_->{type} =~ /alsa/ } @statuses;
-  if (@alsa) {
-    $self->info("Alsa process found");
-    return $alsa[0]->{running};
+      my @alsa = grep { $_->{type} =~ /alsa/ } @statuses;
+      if (@alsa) {
+        $self->config->alsa_running($alsa[0]->{running});
+        return $alsa[0]->{running};
+      } else {
+        $self->debug("Alsa process not yet started");
+        return 0;
+      }
+    } else {
+      return 0;
+    }
   } else {
-    $self->debug("Alsa process not yet started");
-    return 0;
+    return 1;
   }
 }
 
