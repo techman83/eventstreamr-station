@@ -46,4 +46,9 @@ method _build_cmd() {
 
 with('App::EventStreamr::DVswitch::Roles::MixerWait');
 
+after 'stop' => sub {
+  my $self = shift;
+  $self->config->alsa_running('0');
+};
+
 1;

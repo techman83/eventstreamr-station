@@ -76,9 +76,11 @@ method _alsa_started() {
         return 0;
       }
     } else {
+      $self->debug("No content found!!");
       return 0;
     }
   } else {
+    $self->debug("It says we're running!!");
     return 1;
   }
 }

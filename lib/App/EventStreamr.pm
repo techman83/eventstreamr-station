@@ -124,12 +124,17 @@ method run() {
     if ($self->config->run == 2) {
       foreach my $key (keys %{$self->_processes}) {
         if ( $self->_processes->{$key}->type() ne "internal" ) {
+          $self->status->stopping($self->_processes->{$key}->id,$self->_processes->{$key}->type);
           $self->info("Stopping: ".$self->_processes->{$key}->id());
           $self->_processes->{$key}->stop();
+          sleep $self->_processes->{$key}->sleep_time;
+          $self->status->set_state($self->_processes->{$key}->id,$self->_processes->{$key}->type);
         }
       }
       $self->config->run('1');
       $self->config->dvswitch_running('0');
+      $self->config->alsa_running('0');
+      $self->config->write_config();
     }
   }
 }
@@ -142,6 +147,9 @@ method stop() {
       $self->_processes->{$key}->stop();
     }
   }
+  
+  $self->config->dvswitch_running('0');
+  $self->config->alsa_running('0');
   $self->info("Manager stopped: pid=$$, station_id=".$self->config->macaddress);
 }
 
