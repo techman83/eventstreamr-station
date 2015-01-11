@@ -32,8 +32,8 @@ requires 'run_stop','status','config','id','type';
 
 
 method _record_path() {
-  if ( ! defined $self->{status}{$self->{id}}{date} || $self->{status}{$self->{id}}{date} != strftime "%Y%m%d", localtime ) {
-    $self->{status}{$self->{id}}{date} = strftime "%Y%m%d", localtime;
+  if ( ! defined $self->{status}{$self->{id}}{date} || $self->{status}{$self->{id}}{date} ne strftime "%Y-%m-%d", localtime ) {
+    $self->{status}{$self->{id}}{date} = strftime "%Y-%m-%d", localtime;
   
     $self->{status}{$self->{id}}{record_path} = $self->{config}{record_path};
 

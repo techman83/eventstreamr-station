@@ -21,11 +21,12 @@ default cmds that can be overridden in the configuration.
 extends 'App::EventStreamr::Process';
 
 has 'cmd'         => ( is => 'ro', lazy => 1, builder => 1 );
+has 'cmd_regex'   => ( is => 'ro', lazy => 1, builder => 1 );
 has 'id'          => ( is => 'ro', default => sub { 'dvsink' } );
 has 'type'        => ( is => 'ro', default => sub { 'record' } );
 
 method _build_cmd() {
-  my $command = $self->{config}{commands}{file} ? $self->{config}{commands}{file} : 'dvsink-files -h $host -p $port $path/%Y-%m-%d_%H-%M-%S.dv';
+  my $command = $self->{config}{commands}{file} ? $self->{config}{commands}{file} : 'xterm -e "dvsink-files -h $host -p $port $path/%H_%M_%S.dv"';
   
   my %cmd_vars =  (
     host    => $self->{config}{mixer}{host},
@@ -36,6 +37,11 @@ method _build_cmd() {
   $command =~ s/\$(\w+)/$cmd_vars{$1}/g;
   return $command;
 }
+
+method _build_cmd_regex() {
+  return qr:dvsink-files -h $self->{config}{mixer}{host} -p $self->{config}{mixer}{port}.*:;
+}
+
 
 with('App::EventStreamr::Roles::Record');
 
